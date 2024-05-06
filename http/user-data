@@ -1,0 +1,28 @@
+#cloud-config
+autoinstall:
+  version: 1
+  ssh:
+    install-server: true
+    allow-pw: true
+  identity:
+    hostname: packer-ubuntu-base
+    username: ubuntu
+    password: $6$xD6PqxZ4XJ0Sc236$xKDcfClVMUaCTWJJweVvyljwNQMnUEY0FswcucYxrOoo5kkq/k/PWjdaf32SHzAyOI00E0aStfaEDz3wZSb3Q/
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+  apt:
+    fallback: offline-install
+  # work around for freezing at "curtin in-target script"
+  # https://askubuntu.com/questions/1410553/how-to-disable-unattended-upgrades-during-autoinstall-user-data-cloud-config
+  early-commands:
+    - |
+      echo $(dig +short geoip.ubuntu.com | grep -v '\.$' | head -1) geoip.ubuntu.com >>/etc/hosts
+      sed -i '/^nameserver /d' /etc/resolv.conf
+  user-data:
+    timezone: UTC
+    users:
+      - name: ubuntu
+        lock_passwd: false
+        sudo: ALL=(ALL) NOPASSWD:ALL
